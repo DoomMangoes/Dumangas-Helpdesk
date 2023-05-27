@@ -1,12 +1,11 @@
 import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:helpdesk/screens/homePage.dart';
 import 'package:provider/provider.dart';
-
-import '../models/admin.dart';
 import '../models/user.dart';
 import '../providers/helpDeskProvider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -33,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  /*
   User findUser(UnmodifiableListView<User> users, String user, String pass) {
     User match = users.firstWhere((item) => item.username == user, orElse: () {
       return User(username: "", password: "");
@@ -40,32 +40,52 @@ class _LoginPageState extends State<LoginPage> {
 
     return match;
   }
+  */
 
-  Admin findAdmin(UnmodifiableListView<Admin> users, String user, String pass) {
-    Admin match = users.firstWhere((item) => item.username == user, orElse: () {
-      return Admin(username: "", password: "");
-    });
+  Future<bool> verifyUser(String username, String password) async {
+    bool check = false;
 
-    return match;
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+
+    final User user =
+        User(username: username, password: password, isAdmin: false);
+    final url = 'http://127.0.0.1:8000/api/userlogin/';
+
+    final response = await http.post(Uri.parse(url),
+        headers: headers, body: jsonEncode(user.toJson()));
+
+    if (response.statusCode == 201) {
+      var body = jsonDecode(response.body);
+      check = body['userCheck'];
+    } else {
+      alert("Failed to verify user");
+    }
+
+    return check;
   }
 
-  void login(UnmodifiableListView<User> users) {
+  void login(UnmodifiableListView<User> users) async {
     final user = _usernameController.text;
     final pass = _passwordController.text;
 
     if (user != "" && pass != "") {
-      User match = findUser(users, user, pass);
+      //User match = findUser(users, user, pass);
+      //String userType = match.isAdmin ? "Admin" : "User";
+      bool verifyCheck = await verifyUser(user, pass);
 
-      if (match.username != "") {
-        if (match.username == user && match.password == pass) {
-          context
-              .read<HelpDeskProvider>()
-              .login(match.username, match.userType);
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => HomePage()));
-        } else {
-          alert("Username and password do not match");
-        }
+      if (verifyCheck) {
+        final User match = users.firstWhere(
+          (userMatch) => userMatch.username == user,
+          orElse: () {
+            return User(username: "", password: "", isAdmin: false);
+          },
+        );
+        final userType = match.isAdmin ? "Admin" : "User";
+        context.read<HelpDeskProvider>().login(match.username, userType);
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => HomePage()));
       } else {
         alert("User not found");
       }
@@ -73,42 +93,16 @@ class _LoginPageState extends State<LoginPage> {
       alert("All fields must be filled!");
     }
   }
-
-  void adminLogin(UnmodifiableListView<Admin> admins) {
-    final user = _usernameController.text;
-    final pass = _passwordController.text;
-
-    if (user != "" && pass != "") {
-      Admin match = findAdmin(admins, user, pass);
-
-      if (match.username != "") {
-        if (match.username == user && match.password == pass) {
-          context
-              .read<HelpDeskProvider>()
-              .login(match.username, match.userType);
-
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => HomePage()));
-        } else {
-          alert("Username and password do not match");
-        }
-      } else {
-        alert("Admin not found");
-      }
-    } else {
-      alert("All fields must be filled!");
-    }
-  }
-
+  /*
   void register(UnmodifiableListView<User> users) {
     final user = _usernameController.text;
     final pass = _passwordController.text;
 
-    User match = findUser(users, user, pass);
+    //User match = findUser(users, user, pass);
 
     if (user != "" && pass != "") {
       if (match.username == "") {
-        final newUser = User(username: user, password: pass);
+        final newUser = User(username: user, password: pass, isAdmin: false);
         context.read<HelpDeskProvider>().register(newUser);
 
         alert("You have been successfully registered!");
@@ -119,6 +113,7 @@ class _LoginPageState extends State<LoginPage> {
       alert("All fields must be filled!");
     }
   }
+  */
 
   void alert(String message) {
     showDialog(
@@ -142,7 +137,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final provider = Provider.of<HelpDeskProvider>(context);
     final UnmodifiableListView<User> users = provider.users;
-    final UnmodifiableListView<Admin> admins = provider.admins;
 
     return Scaffold(
       appBar: AppBar(
@@ -200,27 +194,9 @@ class _LoginPageState extends State<LoginPage> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        register(users);
+                        //register(users);
                       },
                       child: Text("Register"),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            Container(
-              width: 200,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        adminLogin(admins);
-                      },
-                      child: Text("Admin Login"),
                     ),
                   ),
                 ],

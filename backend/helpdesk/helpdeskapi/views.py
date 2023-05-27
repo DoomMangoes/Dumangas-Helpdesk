@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAdminUser
 from django.contrib.auth.models import User
 from helpdeskapp.models import Category, Report, Comment
 
-from .serializers import UserSerializer, CategorySerializer, ReportSerializer, CommentSerializer, UserLoginSerializer
+from .serializers import UserSerializer, CategorySerializer, ReportSerializer, CommentSerializer, UserLoginSerializer, CheckUserSerializer
 
 # Create your views here.
 
@@ -18,7 +18,7 @@ class UserRecordView(APIView):
     users. GET request returns the registered users whereas
     a POST request allows to create a new user.
     """
-    permission_classes = [IsAdminUser]
+    #permission_classes = [IsAdminUser]
 
     def get(self, format=None):
         users = User.objects.all()
@@ -85,16 +85,18 @@ class CommentListView(APIView):
         
 class UserLoginView(APIView):
     
-    def get(self, request):
-        userSerializer = UserSerializer(data=request.data)
+    def post(self, request):
+        checkUserSerializer = CheckUserSerializer(data=request.data)
        
-        if userSerializer.is_valid():
+        if checkUserSerializer.is_valid():
             
-            user = User.objects.get(username = userSerializer.username)
-            check = user.check_password(userSerializer.password)
+            user = User.objects.get(username = checkUserSerializer.validated_data.get('username'))
+            check = user.check_password(checkUserSerializer.validated_data.get('password'))
 
-    
-            userLoginSerializer = UserLoginSerializer(data= {'userCheck': check})
+            
+            userLoginSerializer = UserLoginSerializer(data={'userCheck': check})
+            userLoginSerializer.is_valid()
+          
 
             return Response(
                 userLoginSerializer.data,
@@ -103,7 +105,7 @@ class UserLoginView(APIView):
         return Response(
             {
                 "error": True,
-                "error_msg": userSerializer.error_messages,
+                "error_msg": checkUserSerializer.error_messages,
             },
             status=status.HTTP_400_BAD_REQUEST
         )

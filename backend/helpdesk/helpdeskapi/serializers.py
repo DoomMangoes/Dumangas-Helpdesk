@@ -51,4 +51,8 @@ class CommentSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
 
     userCheck = serializers.BooleanField(default = False)
+
+class CheckUserSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length = 150)
+    password = serializers.CharField(max_length = 150)
     

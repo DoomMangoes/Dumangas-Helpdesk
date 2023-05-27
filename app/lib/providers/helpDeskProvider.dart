@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:helpdesk/models/category.dart';
 import 'package:helpdesk/models/report.dart';
-import '../models/admin.dart';
 import '../models/comment.dart';
 import '../models/user.dart';
 import 'dart:collection';
 import 'dart:convert';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
 class HelpDeskProvider extends ChangeNotifier {
-  final List<User> _users = [
-    User(username: "user", password: "user"),
-  ];
-  final List<Admin> _admins = [
-    Admin(username: "admin", password: "admin"),
-  ];
+  List<User> _users = [];
 
   final List<Category> _categories = [
     Category(categoryName: "All"),
@@ -63,7 +57,6 @@ class HelpDeskProvider extends ChangeNotifier {
 
   //Read only view
   UnmodifiableListView<User> get users => UnmodifiableListView(_users);
-  UnmodifiableListView<Admin> get admins => UnmodifiableListView(_admins);
   UnmodifiableListView<Report> get reports => UnmodifiableListView(_reports);
   UnmodifiableListView<Category> get categories =>
       UnmodifiableListView(_categories);
@@ -86,6 +79,23 @@ class HelpDeskProvider extends ChangeNotifier {
   String get reportCategory => _reportCategory;
   String get currentReportID => _currentReportID;
   String get userFilter => _userFilter;
+
+  HelpDeskProvider() {
+    this.fetchUsers();
+  }
+
+  void fetchUsers() async {
+    final response =
+        await http.get(Uri.parse('http://127.0.0.1:8000/api/user/'));
+    if (response.statusCode == 200) {
+      final jsonList = jsonDecode(response.body) as List;
+      _users = jsonList.map((json) => User.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch users');
+    }
+
+    notifyListeners();
+  }
 
   void register(User user) {
     _users.add(user);
