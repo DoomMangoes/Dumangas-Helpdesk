@@ -4,7 +4,7 @@ from rest_framework.validators import UniqueTogetherValidator
 from helpdeskapp import models
 
 
-class UserSerializer(serializers.ModelSerializer):
+class AdminUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
@@ -55,4 +55,15 @@ class UserLoginSerializer(serializers.Serializer):
 class CheckUserSerializer(serializers.Serializer):
     username = serializers.CharField(max_length = 150)
     password = serializers.CharField(max_length = 150)
-    
+
+class RegularUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.RegularUser
+        fields = (
+            'username',
+            'password',
+            'is_superuser'
+        )
+       
+

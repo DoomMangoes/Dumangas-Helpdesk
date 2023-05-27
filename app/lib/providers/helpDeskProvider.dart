@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 
 class HelpDeskProvider extends ChangeNotifier {
   List<User> _users = [];
+  List<User> _admins = [];
 
   final List<Category> _categories = [
     Category(categoryName: "All"),
@@ -57,6 +58,7 @@ class HelpDeskProvider extends ChangeNotifier {
 
   //Read only view
   UnmodifiableListView<User> get users => UnmodifiableListView(_users);
+  UnmodifiableListView<User> get admins => UnmodifiableListView(_admins);
   UnmodifiableListView<Report> get reports => UnmodifiableListView(_reports);
   UnmodifiableListView<Category> get categories =>
       UnmodifiableListView(_categories);
@@ -82,6 +84,7 @@ class HelpDeskProvider extends ChangeNotifier {
 
   HelpDeskProvider() {
     this.fetchUsers();
+    this.fetchAdmins();
   }
 
   void fetchUsers() async {
@@ -92,6 +95,19 @@ class HelpDeskProvider extends ChangeNotifier {
       _users = jsonList.map((json) => User.fromJson(json)).toList();
     } else {
       throw Exception('Failed to fetch users');
+    }
+
+    notifyListeners();
+  }
+
+  void fetchAdmins() async {
+    final response =
+        await http.get(Uri.parse('http://127.0.0.1:8000/api/adminuser/'));
+    if (response.statusCode == 200) {
+      final jsonList = jsonDecode(response.body) as List;
+      _admins = jsonList.map((json) => User.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch admin users');
     }
 
     notifyListeners();
