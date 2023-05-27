@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAdminUser
 from django.contrib.auth.models import User
 from helpdeskapp.models import Category, Report, Comment
 
-from .serializers import UserSerializer, CategorySerializer, ReportSerializer, CommentSerializer
+from .serializers import UserSerializer, CategorySerializer, ReportSerializer, CommentSerializer, UserLoginSerializer
 
 # Create your views here.
 
@@ -82,3 +82,33 @@ class CommentListView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+class UserLoginView(APIView):
+    
+    def get(self, request):
+        userSerializer = UserSerializer(data=request.data)
+       
+        if userSerializer.is_valid():
+            
+            user = User.objects.get(username = userSerializer.username)
+            check = user.check_password(userSerializer.password)
+
+    
+            userLoginSerializer = UserLoginSerializer(data= {'userCheck': check})
+
+            return Response(
+                userLoginSerializer.data,
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            {
+                "error": True,
+                "error_msg": userSerializer.error_messages,
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+       
+       
+            
+       
+    

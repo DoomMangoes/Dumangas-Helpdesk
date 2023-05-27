@@ -14,9 +14,6 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'username',
-            'first_name',
-            'last_name',
-            'email',
             'password',
             'is_superuser'
         )
@@ -50,3 +47,8 @@ class CommentSerializer(serializers.ModelSerializer):
             'commentID','commentBody','originalPoster','parentID','date',
         )
         model = models.Comment
+
+class UserLoginSerializer(serializers.Serializer):
+
+    userCheck = serializers.BooleanField(default = False)
+    
