@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ktut(h0__x#(-8$s$egy^j_@=1uk8=9n78c0%7^owz@-fdv1r-'
+SECRET_KEY = 'django-insecure-$vdnw(0y(ostb-8oe31xr@w212$_x*uhe*_z66n!o_vfni4it='
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,9 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'helpdeskapp.apps.HelpdeskappConfig',
-    'helpdeskapi.apps.HelpdeskapiConfig',
-    'rest_framework',
+    'helpdeskapp.apps.HelpdeskappConfig'
 ]
 
 MIDDLEWARE = [
@@ -103,11 +101,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES':[
-        'rest_framework.permissions.AllowAny',
-    ]
-}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
