@@ -43,7 +43,7 @@ class _AddCommentPageState extends State<AddCommentPage> {
           parentID: reportItem.reportID,
           date: DateTime.now());
 
-      context.read<HelpDeskProvider>().addComment(reportItem, newComment);
+      context.read<HelpDeskProvider>().addComment(newComment);
 
       Navigator.of(context).pop();
     } else {

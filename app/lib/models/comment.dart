@@ -41,6 +41,6 @@ class Comment {
         'originalPoster': originalPoster,
         'userType': userType,
         'parentID': parentID,
-        'date': date,
+        'date': date.toIso8601String().substring(0, 10),
       };
 }

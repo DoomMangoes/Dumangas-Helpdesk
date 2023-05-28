@@ -32,10 +32,10 @@ class CommentListWidget extends StatelessWidget {
             shrinkWrap: true,
             padding: EdgeInsets.all(10),
             separatorBuilder: (context, index) => Container(height: 8),
-            itemCount: comments.length,
+            itemCount: commentList.length,
             itemBuilder: (BuildContext context, int index) {
               return CommentItemWidget(
-                commentItem: comments[index],
+                commentItem: commentList[index],
               );
             });
   }

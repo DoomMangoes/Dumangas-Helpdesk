@@ -46,6 +46,6 @@ class Report {
         'originalPoster': originalPoster,
         'userType': userType,
         'category': category,
-        'date': date,
+        'date': date.toIso8601String().substring(0, 10),
       };
 }

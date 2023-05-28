@@ -104,7 +104,7 @@ class ReportPostWidget extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "Comments: " + comments.length.toString(),
+                      "Comments: " + commentList.length.toString(),
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey[700],

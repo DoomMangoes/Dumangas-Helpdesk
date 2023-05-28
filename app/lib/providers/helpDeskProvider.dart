@@ -155,6 +155,37 @@ class HelpDeskProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> addReport(Report report) async {
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+    final url = 'http://127.0.0.1:8000/api/report/';
+
+    final response = await http.post(Uri.parse(url),
+        headers: headers, body: jsonEncode(report.toJson()));
+
+    if (response.statusCode == 201) {
+      fetchReports();
+    }
+    notifyListeners();
+  }
+
+  Future<void> addComment(Comment comment) async {
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+    final url = 'http://127.0.0.1:8000/api/comment/';
+
+    final response = await http.post(Uri.parse(url),
+        headers: headers, body: jsonEncode(comment.toJson()));
+
+    if (response.statusCode == 201) {
+      fetchComments();
+    }
+
+    notifyListeners();
+  }
+
   void login(String currentUser, String currentUserType) {
     _currentUser = currentUser;
     _currentUserType = currentUserType;
@@ -174,15 +205,6 @@ class HelpDeskProvider extends ChangeNotifier {
   void setCurrentReport(String currentReportID) {
     _currentReportID = currentReportID;
 
-    notifyListeners();
-  }
-
-  void addReport(Report report) {
-    _reports.add(report);
-    notifyListeners();
-  }
-
-  void addComment(Report report, Comment comment) {
     notifyListeners();
   }
 
