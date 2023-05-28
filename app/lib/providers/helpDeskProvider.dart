@@ -10,25 +10,7 @@ import 'package:http/http.dart' as http;
 class HelpDeskProvider extends ChangeNotifier {
   List<User> _users = [];
   List<User> _admins = [];
-
-  final List<Category> _categories = [
-    Category(categoryName: "All"),
-    Category(categoryName: "General"),
-    Category(categoryName: "AD Management"),
-    Category(categoryName: "E-mail"),
-    Category(categoryName: "Hardware"),
-    Category(categoryName: "Intranet"),
-    Category(categoryName: "Internet"),
-    Category(categoryName: "Network"),
-    Category(categoryName: "Phones"),
-    Category(categoryName: "Printers"),
-    Category(categoryName: "Programming"),
-    Category(categoryName: "Scanners"),
-    Category(categoryName: "Software"),
-    Category(categoryName: "Training"),
-    Category(categoryName: "Virus/Malware"),
-    Category(categoryName: "Other"),
-  ];
+  List<Category> _categories = [];
 
   final List<Report> _reports = [
     Report(
@@ -85,6 +67,7 @@ class HelpDeskProvider extends ChangeNotifier {
   HelpDeskProvider() {
     this.fetchUsers();
     this.fetchAdmins();
+    this.fetchCategories();
   }
 
   void fetchUsers() async {
@@ -113,8 +96,48 @@ class HelpDeskProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void register(User user) {
-    _users.add(user);
+  void fetchCategories() async {
+    final response =
+        await http.get(Uri.parse('http://127.0.0.1:8000/api/category/'));
+    if (response.statusCode == 200) {
+      final jsonList = jsonDecode(response.body) as List;
+      _categories = jsonList.map((json) => Category.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch categories');
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> register(User user) async {
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+    final url = 'http://127.0.0.1:8000/api/user/';
+
+    final response = await http.post(Uri.parse(url),
+        headers: headers, body: jsonEncode(user.toJson()));
+
+    if (response.statusCode == 201) {
+      fetchUsers();
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> addCategory(Category category) async {
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+    final url = 'http://127.0.0.1:8000/api/category/';
+
+    final response = await http.post(Uri.parse(url),
+        headers: headers, body: jsonEncode(category.toJson()));
+
+    if (response.statusCode == 201) {
+      fetchCategories();
+    }
+
     notifyListeners();
   }
 

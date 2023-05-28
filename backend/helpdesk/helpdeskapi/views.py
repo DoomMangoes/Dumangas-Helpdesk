@@ -107,11 +107,20 @@ class UserLoginView(APIView):
        
 class UserRecordView(APIView):
    
-    def get(self, format=None):
+    def get(self, request):
         users = RegularUser.objects.all()
         serializer = RegularUserSerializer(users, many=True)
         return Response(serializer.data)
     
+    def post(self, request):
+        serializer = RegularUserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 class AdminLoginView(APIView):
     
      def post(self, request):
