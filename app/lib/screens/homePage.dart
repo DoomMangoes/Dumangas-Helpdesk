@@ -21,18 +21,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late final TextEditingController _filterController;
+  late final TextEditingController _categoryController;
 
   @override
   void initState() {
     _filterController = TextEditingController();
-
+    _categoryController = TextEditingController();
     super.initState();
   }
 
   @override
   void dispose() {
     _filterController.dispose();
-
+    _categoryController.dispose();
     super.dispose();
   }
 
@@ -48,6 +49,17 @@ class _HomePageState extends State<HomePage> {
 
   void clearFilter() {
     context.read<HelpDeskProvider>().changeUserFilter("");
+  }
+
+  void addCategory() {
+    final String category = _categoryController.text;
+
+    if (category.isNotEmpty) {
+      final Category newCategory = Category(categoryName: category);
+      context.read<HelpDeskProvider>().addCategory(newCategory);
+    } else {
+      alert();
+    }
   }
 
   void filterUserDialog() {
@@ -82,6 +94,41 @@ class _HomePageState extends State<HomePage> {
                       });
                     },
                     child: Center(child: Text("Clear Filter"))),
+                SizedBox(height: 10),
+                ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        Navigator.of(context).pop();
+                      });
+                    },
+                    child: Center(child: Text("Back"))),
+              ]);
+        });
+  }
+
+  void addCategoryDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              title: Text("Add new category:", textAlign: TextAlign.center),
+              actions: <Widget>[
+                TextField(
+                  maxLines: 1,
+                  controller: _categoryController,
+                  decoration: InputDecoration(
+                    labelText: "Category Name:",
+                  ),
+                ),
+                SizedBox(height: 15),
+                ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        addCategory();
+                        Navigator.of(context).pop();
+                      });
+                    },
+                    child: Center(child: Text("Add Category"))),
                 SizedBox(height: 10),
                 ElevatedButton(
                     onPressed: () {
@@ -195,13 +242,36 @@ class _HomePageState extends State<HomePage> {
                 Icons.add,
               ),
             )
-          : FloatingActionButton(
-              onPressed: () {
-                filterUserDialog();
-              },
-              child: const Icon(
-                Icons.filter_alt,
-              ),
+          : Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned(
+                  left: 30,
+                  bottom: 20,
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      addCategoryDialog();
+                    },
+                    child: const Icon(
+                      Icons.category,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 20,
+                  right: 30,
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      filterUserDialog();
+                    },
+                    child: const Icon(
+                      Icons.filter_alt,
+                    ),
+                  ),
+                ),
+                // Add more floating buttons if you want
+                // There is no limit
+              ],
             ),
     );
   }

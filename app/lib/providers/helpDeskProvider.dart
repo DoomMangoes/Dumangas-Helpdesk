@@ -1,56 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:helpdesk/models/category.dart';
 import 'package:helpdesk/models/report.dart';
-import '../models/admin.dart';
+import 'package:uuid/uuid.dart';
 import '../models/comment.dart';
 import '../models/user.dart';
 import 'dart:collection';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class HelpDeskProvider extends ChangeNotifier {
-  final List<User> _users = [
-    User(username: "user", password: "user"),
-  ];
-  final List<Admin> _admins = [
-    Admin(username: "admin", password: "admin"),
-  ];
-
-  final List<Category> _categories = [
-    Category(categoryName: "All"),
-    Category(categoryName: "General"),
-    Category(categoryName: "AD Management"),
-    Category(categoryName: "E-mail"),
-    Category(categoryName: "Hardware"),
-    Category(categoryName: "Intranet"),
-    Category(categoryName: "Internet"),
-    Category(categoryName: "Network"),
-    Category(categoryName: "Phones"),
-    Category(categoryName: "Printers"),
-    Category(categoryName: "Programming"),
-    Category(categoryName: "Scanners"),
-    Category(categoryName: "Software"),
-    Category(categoryName: "Training"),
-    Category(categoryName: "Virus/Malware"),
-    Category(categoryName: "Other"),
-  ];
-
-  final List<Report> _reports = [
-    Report(
-      reportTitle: "Admin Deeznuts",
-      reportBody:
-          "Muteki no egao de arasu media \nShiritai sono himitsu misuteriasu \nNuketeru toko sae kanojo no eria \nKanpeki na usotsuki na kimi wa \nTensaiteki na aidooru-sama",
-      originalPoster: "Admin",
-      userType: "Admin",
-      category: "General",
-      date: DateTime.now(),
-    ),
-    Report(
-        reportTitle: "Not working",
-        reportBody: "I dunno",
-        originalPoster: "user",
-        userType: "User",
-        category: "Hardware",
-        date: DateTime.now())
-  ];
+  List<User> _users = [];
+  List<User> _admins = [];
+  List<Category> _categories = [];
+  List<Report> _reports = [];
+  List<Comment> _comments = [];
 
   String _currentUser = "Test";
   String _currentUserType = "Test";
@@ -61,8 +24,9 @@ class HelpDeskProvider extends ChangeNotifier {
 
   //Read only view
   UnmodifiableListView<User> get users => UnmodifiableListView(_users);
-  UnmodifiableListView<Admin> get admins => UnmodifiableListView(_admins);
+  UnmodifiableListView<User> get admins => UnmodifiableListView(_admins);
   UnmodifiableListView<Report> get reports => UnmodifiableListView(_reports);
+  UnmodifiableListView<Comment> get comments => UnmodifiableListView(_comments);
   UnmodifiableListView<Category> get categories =>
       UnmodifiableListView(_categories);
 
@@ -70,6 +34,7 @@ class HelpDeskProvider extends ChangeNotifier {
       _reports.firstWhere((report) => report.reportID == _currentReportID,
           orElse: () {
         return Report(
+            reportID: const Uuid().v4(),
             reportTitle: "",
             reportBody: "",
             originalPoster: "",
@@ -85,8 +50,139 @@ class HelpDeskProvider extends ChangeNotifier {
   String get currentReportID => _currentReportID;
   String get userFilter => _userFilter;
 
-  void register(User user) {
-    _users.add(user);
+  HelpDeskProvider() {
+    this.fetchUsers();
+    this.fetchAdmins();
+    this.fetchCategories();
+    this.fetchReports();
+    this.fetchComments();
+  }
+
+  void fetchUsers() async {
+    final response =
+        await http.get(Uri.parse('http://127.0.0.1:8000/api/user/'));
+    if (response.statusCode == 200) {
+      final jsonList = jsonDecode(response.body) as List;
+      _users = jsonList.map((json) => User.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch users');
+    }
+
+    notifyListeners();
+  }
+
+  void fetchAdmins() async {
+    final response =
+        await http.get(Uri.parse('http://127.0.0.1:8000/api/adminuser/'));
+    if (response.statusCode == 200) {
+      final jsonList = jsonDecode(response.body) as List;
+      _admins = jsonList.map((json) => User.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch admin users');
+    }
+
+    notifyListeners();
+  }
+
+  void fetchCategories() async {
+    final response =
+        await http.get(Uri.parse('http://127.0.0.1:8000/api/category/'));
+    if (response.statusCode == 200) {
+      final jsonList = jsonDecode(response.body) as List;
+      _categories = jsonList.map((json) => Category.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch categories');
+    }
+
+    notifyListeners();
+  }
+
+  void fetchReports() async {
+    final response =
+        await http.get(Uri.parse('http://127.0.0.1:8000/api/report/'));
+    if (response.statusCode == 200) {
+      final jsonList = jsonDecode(response.body) as List;
+      _reports = jsonList.map((json) => Report.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch reports');
+    }
+
+    notifyListeners();
+  }
+
+  void fetchComments() async {
+    final response =
+        await http.get(Uri.parse('http://127.0.0.1:8000/api/comment/'));
+    if (response.statusCode == 200) {
+      final jsonList = jsonDecode(response.body) as List;
+      _comments = jsonList.map((json) => Comment.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch comments');
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> register(User user) async {
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+    final url = 'http://127.0.0.1:8000/api/user/';
+
+    final response = await http.post(Uri.parse(url),
+        headers: headers, body: jsonEncode(user.toJson()));
+
+    if (response.statusCode == 201) {
+      fetchUsers();
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> addCategory(Category category) async {
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+    final url = 'http://127.0.0.1:8000/api/category/';
+
+    final response = await http.post(Uri.parse(url),
+        headers: headers, body: jsonEncode(category.toJson()));
+
+    if (response.statusCode == 201) {
+      fetchCategories();
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> addReport(Report report) async {
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+    final url = 'http://127.0.0.1:8000/api/report/';
+
+    final response = await http.post(Uri.parse(url),
+        headers: headers, body: jsonEncode(report.toJson()));
+
+    if (response.statusCode == 201) {
+      fetchReports();
+    }
+    notifyListeners();
+  }
+
+  Future<void> addComment(Comment comment) async {
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+    final url = 'http://127.0.0.1:8000/api/comment/';
+
+    final response = await http.post(Uri.parse(url),
+        headers: headers, body: jsonEncode(comment.toJson()));
+
+    if (response.statusCode == 201) {
+      fetchComments();
+    }
+
     notifyListeners();
   }
 
@@ -108,17 +204,6 @@ class HelpDeskProvider extends ChangeNotifier {
 
   void setCurrentReport(String currentReportID) {
     _currentReportID = currentReportID;
-
-    notifyListeners();
-  }
-
-  void addReport(Report report) {
-    _reports.add(report);
-    notifyListeners();
-  }
-
-  void addComment(Report report, Comment comment) {
-    report.comments.add(comment);
 
     notifyListeners();
   }

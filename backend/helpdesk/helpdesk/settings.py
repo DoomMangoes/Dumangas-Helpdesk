@@ -27,6 +27,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+#CORS_ALLOWED_ORIGINS = [
+#   
+#]
+CORS_ORIGIN_ALLOW_ALL = True
+
+
 
 # Application definition
 
@@ -38,7 +44,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'helpdeskapp.apps.HelpdeskappConfig'
+    'helpdeskapp.apps.HelpdeskappConfig',
+    'helpdeskapi.apps.HelpdeskapiConfig',
+
+    'rest_framework',
+    'rest_framework.authtoken',
+
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +61,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'helpdesk.urls'
@@ -101,6 +116,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+  #  'DEFAULT_AUTHENTICATION_CLASSES': (
+   #     'rest_framework.authentication.TokenAuthentication',
+   # ),
+    'DEFAULT_PERMISSION_CLASSES': [
+   #     'rest_framework.permissions.IsAuthenticated',
+    'rest_framework.permissions.AllowAny',
+   
+    ],
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

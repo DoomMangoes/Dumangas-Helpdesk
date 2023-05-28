@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:helpdesk/models/comment.dart';
 import 'package:helpdesk/models/report.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 import '../providers/helpDeskProvider.dart';
 
@@ -35,13 +36,14 @@ class _AddCommentPageState extends State<AddCommentPage> {
 
     if (comment.isNotEmpty) {
       final newComment = Comment(
+          commentID: const Uuid().v4(),
           commentBody: comment,
           originalPoster: currentUser,
           userType: currentUserType,
           parentID: reportItem.reportID,
           date: DateTime.now());
 
-      context.read<HelpDeskProvider>().addComment(reportItem, newComment);
+      context.read<HelpDeskProvider>().addComment(newComment);
 
       Navigator.of(context).pop();
     } else {
