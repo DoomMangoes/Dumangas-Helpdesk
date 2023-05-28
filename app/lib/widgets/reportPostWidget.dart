@@ -1,6 +1,9 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../models/comment.dart';
 import '../models/report.dart';
 import '../providers/helpDeskProvider.dart';
 import '../screens/reportPage.dart';
@@ -14,6 +17,13 @@ class ReportPostWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<HelpDeskProvider>(context);
+    final UnmodifiableListView<Comment> comments = provider.comments;
+
+    List<Comment> commentList = comments
+        .where((comment) => comment.parentID == reportItem.reportID)
+        .toList();
+
     return InkWell(
       onTap: () {
         context.read<HelpDeskProvider>().setCurrentReport(reportItem.reportID);
@@ -94,7 +104,7 @@ class ReportPostWidget extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "Comments: " + reportItem.comments.length.toString(),
+                      "Comments: " + comments.length.toString(),
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey[700],

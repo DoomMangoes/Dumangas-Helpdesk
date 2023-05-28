@@ -1,7 +1,10 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../models/comment.dart';
 import '../models/report.dart';
 import '../providers/helpDeskProvider.dart';
 
@@ -15,6 +18,12 @@ class ReportPostViewWidget extends StatelessWidget {
     final Report reportItem = context.select<HelpDeskProvider, Report>(
       (provider) => provider.currentReport,
     );
+    final provider = Provider.of<HelpDeskProvider>(context);
+    final UnmodifiableListView<Comment> comments = provider.comments;
+
+    List<Comment> commentList = comments
+        .where((comment) => comment.parentID == reportItem.reportID)
+        .toList();
 
     return Container(
       padding: EdgeInsets.only(
@@ -106,7 +115,7 @@ class ReportPostViewWidget extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "Comments: " + reportItem.comments.length.toString(),
+                    "Comments: " + comments.length.toString(),
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey[700],

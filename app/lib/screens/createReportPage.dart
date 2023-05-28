@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:helpdesk/models/report.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/category.dart';
 import '../providers/helpDeskProvider.dart';
@@ -38,6 +39,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
 
     if (title.isNotEmpty && body.isNotEmpty) {
       final newReport = Report(
+          reportID: const Uuid().v4(),
           reportTitle: title,
           reportBody: body,
           originalPoster: currentUser,

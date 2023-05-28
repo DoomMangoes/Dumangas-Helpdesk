@@ -10,21 +10,42 @@ class Report {
   String userType;
   String category;
   DateTime date;
-  List<Comment> comments;
 
   Report({
+    required this.reportID,
     required this.reportTitle,
     required this.reportBody,
     required this.originalPoster,
     required this.userType,
     required this.category,
     required this.date,
-  })  : reportID = const Uuid().v4(),
-        comments = [];
+  });
 
   @override
   bool operator ==(covariant Report other) => reportID == other.reportID;
 
   @override
   int get hashCode => reportID.hashCode;
+
+  factory Report.fromJson(Map<String, dynamic> json) {
+    return Report(
+      reportID: json['reportID'],
+      reportTitle: json['reportTitle'],
+      reportBody: json['reportBody'],
+      originalPoster: json['originalPoster'],
+      userType: json['userType'],
+      category: json['category'],
+      date: DateTime.parse(json['date']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'reportID': reportID,
+        'reportTitle': reportTitle,
+        'reportBody': reportBody,
+        'originalPoster': originalPoster,
+        'userType': userType,
+        'category': category,
+        'date': date,
+      };
 }

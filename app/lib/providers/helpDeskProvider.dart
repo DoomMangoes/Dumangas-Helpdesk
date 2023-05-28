@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:helpdesk/models/category.dart';
 import 'package:helpdesk/models/report.dart';
+import 'package:uuid/uuid.dart';
 import '../models/comment.dart';
 import '../models/user.dart';
 import 'dart:collection';
@@ -11,25 +12,8 @@ class HelpDeskProvider extends ChangeNotifier {
   List<User> _users = [];
   List<User> _admins = [];
   List<Category> _categories = [];
-
-  final List<Report> _reports = [
-    Report(
-      reportTitle: "Admin Deeznuts",
-      reportBody:
-          "Muteki no egao de arasu media \nShiritai sono himitsu misuteriasu \nNuketeru toko sae kanojo no eria \nKanpeki na usotsuki na kimi wa \nTensaiteki na aidooru-sama",
-      originalPoster: "Admin",
-      userType: "Admin",
-      category: "General",
-      date: DateTime.now(),
-    ),
-    Report(
-        reportTitle: "Not working",
-        reportBody: "I dunno",
-        originalPoster: "user",
-        userType: "User",
-        category: "Hardware",
-        date: DateTime.now())
-  ];
+  List<Report> _reports = [];
+  List<Comment> _comments = [];
 
   String _currentUser = "Test";
   String _currentUserType = "Test";
@@ -42,6 +26,7 @@ class HelpDeskProvider extends ChangeNotifier {
   UnmodifiableListView<User> get users => UnmodifiableListView(_users);
   UnmodifiableListView<User> get admins => UnmodifiableListView(_admins);
   UnmodifiableListView<Report> get reports => UnmodifiableListView(_reports);
+  UnmodifiableListView<Comment> get comments => UnmodifiableListView(_comments);
   UnmodifiableListView<Category> get categories =>
       UnmodifiableListView(_categories);
 
@@ -49,6 +34,7 @@ class HelpDeskProvider extends ChangeNotifier {
       _reports.firstWhere((report) => report.reportID == _currentReportID,
           orElse: () {
         return Report(
+            reportID: const Uuid().v4(),
             reportTitle: "",
             reportBody: "",
             originalPoster: "",
@@ -68,6 +54,8 @@ class HelpDeskProvider extends ChangeNotifier {
     this.fetchUsers();
     this.fetchAdmins();
     this.fetchCategories();
+    this.fetchReports();
+    this.fetchComments();
   }
 
   void fetchUsers() async {
@@ -104,6 +92,32 @@ class HelpDeskProvider extends ChangeNotifier {
       _categories = jsonList.map((json) => Category.fromJson(json)).toList();
     } else {
       throw Exception('Failed to fetch categories');
+    }
+
+    notifyListeners();
+  }
+
+  void fetchReports() async {
+    final response =
+        await http.get(Uri.parse('http://127.0.0.1:8000/api/report/'));
+    if (response.statusCode == 200) {
+      final jsonList = jsonDecode(response.body) as List;
+      _reports = jsonList.map((json) => Report.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch reports');
+    }
+
+    notifyListeners();
+  }
+
+  void fetchComments() async {
+    final response =
+        await http.get(Uri.parse('http://127.0.0.1:8000/api/comment/'));
+    if (response.statusCode == 200) {
+      final jsonList = jsonDecode(response.body) as List;
+      _comments = jsonList.map((json) => Comment.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch comments');
     }
 
     notifyListeners();
@@ -169,8 +183,6 @@ class HelpDeskProvider extends ChangeNotifier {
   }
 
   void addComment(Report report, Comment comment) {
-    report.comments.add(comment);
-
     notifyListeners();
   }
 

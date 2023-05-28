@@ -36,7 +36,7 @@ class ReportSerializer(serializers.ModelSerializer):
     
     class Meta:
         fields=( 
-            'reportID','reportTitle','reportBody','originalPoster','category','date',
+            'reportID','reportTitle','reportBody','originalPoster','userType','category','date',
         )
         model = models.Report
 
@@ -44,7 +44,7 @@ class CommentSerializer(serializers.ModelSerializer):
     
     class Meta:
         fields=( 
-            'commentID','commentBody','originalPoster','parentID','date',
+            'commentID','commentBody','originalPoster','userType','parentID','date',
         )
         model = models.Comment
 
